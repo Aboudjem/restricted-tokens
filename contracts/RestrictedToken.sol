@@ -1,12 +1,14 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity =0.8.17;
 
+import "./interfaces/IRestrictedToken.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 
-/// @title BanToken
+/// @title RestrictedToken
 /// @dev An ERC20 token that allows an admin to ban specified addresses from sending and receiving tokens.
-contract BanToken is ERC20, Ownable {
+contract RestrictedToken is IRestrictedToken, ERC20, Ownable {
+
     mapping(address => bool) private _restricted;
 
     constructor(
