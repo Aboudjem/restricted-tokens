@@ -2,8 +2,8 @@ import { expect } from "chai";
 import { ethers } from "hardhat";
 import { Contract, Signer, utils } from "ethers";
 
-describe("BanToken", function () {
-  let banToken: Contract;
+describe("RestrictedToken", function () {
+  let restrictedToken: Contract;
   let user1: Signer;
   let user2: Signer;
   let admin: Signer;
@@ -12,17 +12,17 @@ describe("BanToken", function () {
   let userAddress2: String;
 
   before(async function () {
-    const BanToken = await ethers.getContractFactory("BanToken");
-    banToken = await BanToken.deploy("BanToken", "BAN");
-    await banToken.deployed();
+    const RestrictedToken = await ethers.getContractFactory("RestrictedToken");
+    restrictedToken = await RestrictedToken.deploy("RestrictedToken", "BAN");
+    await restrictedToken.deployed();
     [admin, user1, user2] = await ethers.getSigners();
     userAddress1 = await user1.getAddress();
     userAddress2 = await user2.getAddress();
   });
 
-  it("Should deploy the BanToken contract successfully", async () => {
+  it("Should deploy the RestrictedToken contract successfully", async () => {
     const codeSize = await ethers.provider
-      .getCode(banToken.address)
+      .getCode(restrictedToken.address)
       .then((code) => {
         return code.length;
       });
@@ -30,51 +30,55 @@ describe("BanToken", function () {
   });
 
   it("Should successfully restrict an address when called by the owner", async () => {
-    expect(await banToken.isRestricted(userAddress1)).to.equal(false);
-    await banToken.connect(admin).restrictAddress(userAddress1);
-    expect(await banToken.isRestricted(userAddress1)).to.equal(true);
+    expect(await restrictedToken.isRestricted(userAddress1)).to.equal(false);
+    await restrictedToken.connect(admin).restrictAddress(userAddress1);
+    expect(await restrictedToken.isRestricted(userAddress1)).to.equal(true);
   });
 
   it("Should fail to restrict an address when called by a non-admin user", async () => {
     await expect(
-      banToken.connect(user1).restrictAddress(userAddress2)
+      restrictedToken.connect(user1).restrictAddress(userAddress2)
     ).to.be.revertedWith("Ownable: caller is not the owner");
   });
 
   it("Should fail to un-restrict an address when called by a non-admin user", async () => {
     await expect(
-      banToken.connect(user1).unRestrictAddress(userAddress2)
+      restrictedToken.connect(user1).unRestrictAddress(userAddress2)
     ).to.be.revertedWith("Ownable: caller is not the owner");
   });
 
   it("Should successfully un-restrict an address when called by the owner", async () => {
-    expect(await banToken.isRestricted(userAddress1)).to.equal(true);
-    await banToken.connect(admin).unRestrictAddress(userAddress1);
-    expect(await banToken.isRestricted(userAddress1)).to.equal(false);
+    expect(await restrictedToken.isRestricted(userAddress1)).to.equal(true);
+    await restrictedToken.connect(admin).unRestrictAddress(userAddress1);
+    expect(await restrictedToken.isRestricted(userAddress1)).to.equal(false);
   });
 
   it("Should successfully transfer tokens to an unrestricted address", async () => {
-    expect(await banToken.balanceOf(userAddress1)).to.equal(0);
-    await banToken.transfer(userAddress1, utils.parseEther("1000"));
-    expect(await banToken.balanceOf(userAddress1)).to.equal(
+    expect(await restrictedToken.balanceOf(userAddress1)).to.equal(0);
+    await restrictedToken.transfer(userAddress1, utils.parseEther("1000"));
+    expect(await restrictedToken.balanceOf(userAddress1)).to.equal(
       utils.parseEther("1000")
     );
   });
 
   it("Should successfully restrict an address when called by the owner", async () => {
-    await banToken.connect(admin).restrictAddress(userAddress1);
-    expect(await banToken.isRestricted(userAddress1)).to.equal(true);
+    await restrictedToken.connect(admin).restrictAddress(userAddress1);
+    expect(await restrictedToken.isRestricted(userAddress1)).to.equal(true);
   });
 
   it("Should fail to transfer tokens from a restricted address", async () => {
     await expect(
-      banToken.connect(user1).transfer(userAddress2, utils.parseEther("1000"))
+      restrictedToken
+        .connect(user1)
+        .transfer(userAddress2, utils.parseEther("1000"))
     ).to.be.revertedWith("Restricted 'from' address.");
   });
 
   it("Should fail to transfer tokens to a restricted address", async () => {
     await expect(
-      banToken.connect(user2).transfer(userAddress1, utils.parseEther("1000"))
+      restrictedToken
+        .connect(user2)
+        .transfer(userAddress1, utils.parseEther("1000"))
     ).to.be.revertedWith("Restricted 'to' address.");
   });
 });
