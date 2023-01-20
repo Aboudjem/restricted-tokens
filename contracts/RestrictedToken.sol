@@ -8,7 +8,6 @@ import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 /// @title RestrictedToken
 /// @dev An ERC20 token that allows an admin to ban specified addresses from sending and receiving tokens.
 contract RestrictedToken is IRestrictedToken, ERC20, Ownable {
-
     mapping(address => bool) private _restricted;
 
     constructor(
