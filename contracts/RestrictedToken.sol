@@ -9,8 +9,6 @@ import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 contract BanToken is ERC20, Ownable {
     mapping(address => bool) private _restricted;
 
-    event AddressRestrictionUpdated(address indexed _addr, bool _restricted);
-
     constructor(
         string memory name_,
         string memory symbol_
