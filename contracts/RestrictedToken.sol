@@ -53,7 +53,7 @@ contract RestrictedToken is IRestrictedToken, ERC20, Ownable {
         address from,
         address to,
         uint256
-    ) internal virtual override {
+    ) internal override {
         require(!_restricted[from], "Restricted 'from' address.");
         require(!_restricted[to], "Restricted 'to' address.");
     }
